@@ -12,6 +12,12 @@ COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 RUN apt-get -y update
 RUN apt-get -y install git
+
+RUN git config --global user.email "lutzurb1@students.zhaw.ch"
+RUN git config --global user.name "Urban Lutz"
+RUN git config http.sslVerify false
+
+
 # RUN apt-get -y install ntp
 WORKDIR /app
 COPY . /app

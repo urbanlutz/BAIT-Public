@@ -38,7 +38,7 @@ def prepare_model(state, args):
 
 
 def prepare(state, args):
-        # prepare
+    # prepare
     prepare_platform(state, args)
     prepare_data(state, args)
     prepare_model(state, args)
@@ -51,11 +51,11 @@ def pretrain(state, args):
     return pre_result
 
 
-def prune(state, args):
+def prune(state, args, sparsity):
      ## Prune ##
     print('Pruning with {} for {} epochs.'.format(args.pruner, args.prune_epochs))
     pruner = load.pruner(args.pruner)(generator.masked_parameters(state.model, args.prune_bias, args.prune_batchnorm, args.prune_residual))
-    sparsity = 10**(-float(args.compression))
+    
     prune_loop(state.model, state.loss, pruner, state.prune_loader, state.device, sparsity, 
                args.compression_schedule, args.mask_scope, args.prune_epochs, args.reinitialize, args.prune_train_mode, args.shuffle, args.invert)
     prune_result = metrics.summary(state.model, 
@@ -63,6 +63,7 @@ def prune(state, args):
                                 metrics.flop(state.model, state.input_shape, state.device),
                                 lambda p: generator.prunable(p, args.prune_batchnorm, args.prune_residual))
     return prune_result
+
 
 def posttrain(state, args):
     ## Post-Train ##
@@ -102,12 +103,3 @@ def run(state, args):
     display(pre_result, prune_result, post_result)
     if args.save:
         save(state, args)
-
-    
-    
-
-
-
-
-
-

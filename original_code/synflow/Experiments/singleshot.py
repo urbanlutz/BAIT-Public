@@ -8,7 +8,7 @@ from original_code.synflow.Utils import metrics
 from original_code.synflow.train import *
 from original_code.synflow.prune import *
 
-
+from params import *
 
 def prepare_data(state, args):
     ## Data ##
@@ -44,17 +44,22 @@ def prepare(state, args):
     prepare_model(state, args)
 
 
-def pretrain(state, args):
-    ## Pre-Train ##
-    print('Pre-Train for {} epochs.'.format(args.pre_epochs))
-    pre_result = train_eval_loop(state.model, state.loss, state.optimizer, state.scheduler, state.train_loader, state.test_loader, state.device, args.pre_epochs, args.verbose)
-    return pre_result
+def train(state, args, epochs):
+    print('Train for {} epochs.'.format(epochs))
+    result = train_eval_loop(state.model, state.loss, state.optimizer, state.scheduler, state.train_loader, state.test_loader, state.device, epochs, args.verbose)
+    return result
+
+# def pretrain(state, args):
+#     ## Pre-Train ##
+#     print('Pre-Train for {} epochs.'.format(args.pre_epochs))
+#     pre_result = train_eval_loop(state.model, state.loss, state.optimizer, state.scheduler, state.train_loader, state.test_loader, state.device, args.pre_epochs, args.verbose)
+#     return pre_result
 
 
-def prune(state, args, sparsity):
+def prune(state: State, args, strategy, sparsity):
      ## Prune ##
-    print('Pruning with {} for {} epochs.'.format(args.pruner, args.prune_epochs))
-    pruner = load.pruner(args.pruner)(generator.masked_parameters(state.model, args.prune_bias, args.prune_batchnorm, args.prune_residual))
+    print('Pruning with {} for {} epochs.'.format(strategy, args.prune_epochs))
+    pruner = load.pruner(strategy)(generator.masked_parameters(state.model, args.prune_bias, args.prune_batchnorm, args.prune_residual))
     
     prune_loop(state.model, state.loss, pruner, state.prune_loader, state.device, sparsity, 
                args.compression_schedule, args.mask_scope, args.prune_epochs, args.reinitialize, args.prune_train_mode, args.shuffle, args.invert)
@@ -65,11 +70,11 @@ def prune(state, args, sparsity):
     return prune_result
 
 
-def posttrain(state, args):
-    ## Post-Train ##
-    print('Post-Training for {} epochs.'.format(args.post_epochs))
-    post_result = train_eval_loop(state.model, state.loss, state.optimizer, state.scheduler, state.train_loader, state.test_loader, state.device, args.post_epochs, args.verbose) 
-    return post_result
+# def posttrain(state, args):
+#     ## Post-Train ##
+#     print('Post-Training for {} epochs.'.format(args.post_epochs))
+#     post_result = train_eval_loop(state.model, state.loss, state.optimizer, state.scheduler, state.train_loader, state.test_loader, state.device, args.post_epochs, args.verbose) 
+#     return post_result
 
 def display(pre_result, prune_result, post_result):
     ## Display Results ##
@@ -97,9 +102,9 @@ def save(state, args, pre_result, prune_result, post_result):
 def run(state, args):
     prepare(state, args)
 
-    pre_result = pretrain(state, args)
+    pre_result = train(state, args, args.pre_epochs)
     prune_result = prune(state, args)
-    post_result = posttrain(state, args)
+    post_result = train(state, args,args.post_epochs)
     display(pre_result, prune_result, post_result)
     if args.save:
         save(state, args)

@@ -1,40 +1,75 @@
+import numpy as np
 from original_code.synflow.main import get_args as synflow_get_args
-from original_code.synflow.Experiments import singleshot as synflow_runner
+import run
+from params import *
+
+from copy import deepcopy
 
 
-class State:
-    prune_loader = None
-    train_loader = None
-    test_loader = None
-    model = None
-    loss = None
-    optimizer = None
-    scheduler = None
-    input_shape = None
-    num_classes = None
 
-if __name__ == "__main__":
-    args = synflow_get_args(
-        dataset="cifar10", 
-        model_class="lottery", 
-        model="resnet20",
-        pruner="synflow"
-        )
+def main():
     state = State()
-
+    data_params = DataParams(dataset="cifar10")
+    model_params = ModelParams(model_class="lottery", model="resnet20")
+    
+    run.prepare_data(state, data_params)
+    run.prepare_model(state, model_params, data_params)
     
     # do the synflow thing
-    synflow_runner.prepare(state, args)
 
-    pre_result = synflow_runner.pretrain(state, args)
-    sparsity = 10**(-float(args.compression))
-    prune_result = synflow_runner.prune(state, args, 0.1)
+
+    pre_result = run.train(state, 5)
+    # sparsity = 10**(-float(args.compression))
+    prune_params = PruningParams(strategy="synflow")
+    prune_result = run.prune(state, prune_params, data_params)
 
     # continue with lth
+    lth_prune_result = iterative_pruning(state, args, )
+
+    # post_result = run.posttrain(state, args)
+    # run.display(pre_result, prune_result, post_result)
+    
 
 
-    # post_result = synflow_runner.posttrain(state, args)
-    # synflow_runner.display(pre_result, prune_result, post_result)
+def one_shot_pruning(state, args, strategy="synflow", target_sparsity=0.5):
+    remaining_params, total_params = args.pruner.stats()
+    current_sparsity = remaining_params / total_params
+    
+    if current_sparsity < target_sparsity:
+        print(f"nothing to prune: currently at {current_sparsity}, target is {target_sparsity}")
+        return
+    
+    prune_result = run.prune(state, args, strategy, target_sparsity)
 
-    if args.save:
-        synflow_runner.save(state, args)
+
+
+def iterative_pruning(state, args, strategy="mag", target_sparsity=0.1, iterations=5):
+    remaining_params, total_params = args.pruner.stats()
+    current_sparsity = remaining_params / total_params
+    sparsity_targets = list(np.linspace(current_sparsity, target_sparsity, iterations))
+    results = []
+
+    original_state = deepcopy(state.model.state_dict())
+
+
+    for sparsity in sparsity_targets:
+
+        # train
+        result = run.train(state, args, epochs=1)
+        results.append(result)
+
+        # prune
+        if sparsity < 1:
+            prune_result = run.prune(state, args, strategy, sparsity)
+            results.append(prune_result)
+
+        # rewind
+        original_weights = dict(filter(lambda v: (v[0].endswith(('.weight', '.bias'))), original_state.items()))
+        model_dict = state.model.state_dict()
+        model_dict.update(original_weights)
+        state.model.load_state_dict(model_dict)
+
+    return results
+
+if __name__ == "__main__":
+    main()

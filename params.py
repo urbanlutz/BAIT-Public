@@ -24,31 +24,28 @@ class ModelParams:
     optimizer: str
     dense_classifier: bool = False
     pretrained: bool = False
+    optimizer: str = "adam"
  
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
 
 class DataParams:
-    dataset: str
+    dataset: str = "mnist"
     num_classes: int
     input_shape: Tuple[int, int, int]
-    train_batch_size: int
-    test_batch_size: int
-    prune_batch_size: int
-    workers: int
-    prune_dataset_ratio: float
+    train_batch_size: int = 64
+    test_batch_size: int = 256
+    prune_batch_size: int = 256
+    workers: int = 4
+    prune_dataset_ratio: int = 10
 
-    def __init__(self, dataset="mnist", train_batch_size=64, test_batch_size=256, prune_batch_size=256, workers=4):
-        self.dataset = dataset
-        self.input_shape, self.num_classes = load.dimension(dataset) 
-        self.train_batch_size = train_batch_size
-        self.test_batch_size = test_batch_size
-        self.prune_batch_size = prune_batch_size
-        self.workers = workers
+    def __init__(self, **kwargs):
+        self.__dict__.update(**kwargs)
+        self.input_shape, self.num_classes = load.dimension(self.dataset) 
 
 class PruningParams:
-    strategy: str
-    sparsity: float
+    strategy: str = "synflow"
+    sparsity: float = 0.5
     prune_epochs: int = 1
     prune_bias: bool = False
     prune_batchnorm: bool = False

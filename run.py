@@ -32,13 +32,13 @@ def prepare_model(state: State, model_params: ModelParams, data_params: DataPara
 
 
 def train(state: State, epochs):
-    print('Train for {} epochs.'.format(epochs))
+    print(f'Train for {epochs} epochs.')
     result = train_eval_loop(state.model, state.loss, state.optimizer, state.scheduler, state.train_loader, state.test_loader, ENV.device, epochs, ENV.verbose)
     return result
 
 def prune(state: State, prune_params: PruningParams, data_params: DataParams):
-     ## Prune ##
-    print('Pruning with {} for {} epochs.'.format(prune_params.strategy, prune_params.prune_epochs))
+    print(f'Pruning with {prune_params.strategy} for {prune_params.prune_epochs} epochs.')
+    
     pruner = load.pruner(prune_params.strategy)(generator.masked_parameters(state.model, prune_params.prune_bias, prune_params.prune_batchnorm, prune_params.prune_residual))
     
     prune_loop(state.model, state.loss, pruner, state.prune_loader, ENV.device, prune_params.sparsity, 

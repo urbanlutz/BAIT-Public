@@ -8,6 +8,8 @@ from copy import deepcopy
 
 
 def main():
+
+    args = synflow_get_args()
     state = State()
     data_params = DataParams(dataset="cifar10")
     model_params = ModelParams(model_class="lottery", model="resnet20")
@@ -18,9 +20,9 @@ def main():
     # do the synflow thing
 
 
-    pre_result = run.train(state, 5)
+    pre_result = run.train(state, epochs=1)
     # sparsity = 10**(-float(args.compression))
-    prune_params = PruningParams(strategy="synflow")
+    prune_params = PruningParams(strategy="synflow", sparsity = 0.5)
     prune_result = run.prune(state, prune_params, data_params)
 
     # continue with lth
@@ -28,18 +30,18 @@ def main():
 
     # post_result = run.posttrain(state, args)
     # run.display(pre_result, prune_result, post_result)
-    
 
 
-def one_shot_pruning(state, args, strategy="synflow", target_sparsity=0.5):
-    remaining_params, total_params = args.pruner.stats()
+
+def one_shot_pruning(state, prune_params: PruningParams, data_params: DataParams):
+    remaining_params, total_params = prune_params.strategy.stats()
     current_sparsity = remaining_params / total_params
     
-    if current_sparsity < target_sparsity:
-        print(f"nothing to prune: currently at {current_sparsity}, target is {target_sparsity}")
+    if current_sparsity < prune_params.sparsity:
+        print(f"nothing to prune: currently at {current_sparsity}, target is {prune_params.sparsity}")
         return
     
-    prune_result = run.prune(state, args, strategy, target_sparsity)
+    prune_result = run.prune(state, prune_params, data_params)
 
 
 

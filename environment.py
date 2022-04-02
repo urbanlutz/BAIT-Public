@@ -6,7 +6,7 @@ class Environment:
     verbose: bool
     seed: int
 
-    def __init__(self, verbose = True, seed=None):
+    def __init__(self, verbose = False, seed=None):
         self.verbose = verbose
         self.device = load.device(0)
 

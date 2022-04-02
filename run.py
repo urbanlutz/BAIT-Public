@@ -30,6 +30,8 @@ def prepare_model(state: State, model_params: ModelParams, data_params: DataPara
     state.optimizer = opt_class(generator.parameters(state.model), lr=model_params.lr, weight_decay=model_params.weight_decay, **opt_kwargs)
     state.scheduler = torch.optim.lr_scheduler.MultiStepLR(state.optimizer, milestones=model_params.lr_drops, gamma=model_params.lr_drop_rate)
 
+def prepare_pruner(state:State, prune_params: PruningParams):
+    state.pruner = load.pruner(prune_params.strategy)(generator.masked_parameters(state.model, prune_params.prune_bias, prune_params.prune_batchnorm, prune_params.prune_residual))
 
 def train(state: State, epochs):
     print(f'Train for {epochs} epochs.')
@@ -38,13 +40,12 @@ def train(state: State, epochs):
 
 def prune(state: State, prune_params: PruningParams, data_params: DataParams):
     print(f'Pruning with {prune_params.strategy} for {prune_params.prune_epochs} epochs.')
-    
-    pruner = load.pruner(prune_params.strategy)(generator.masked_parameters(state.model, prune_params.prune_bias, prune_params.prune_batchnorm, prune_params.prune_residual))
-    
-    prune_loop(state.model, state.loss, pruner, state.prune_loader, ENV.device, prune_params.sparsity, 
+
+            
+    prune_loop(state.model, state.loss, state.pruner, state.prune_loader, ENV.device, prune_params.sparsity, 
                prune_params.compression_schedule, prune_params.mask_scope, prune_params.prune_epochs, prune_params.reinitialize, prune_params.prune_train_mode, prune_params.shuffle, prune_params.invert)
     prune_result = metrics.summary(state.model, 
-                                pruner.scores,
+                                state.pruner.scores,
                                 metrics.flop(state.model, data_params.input_shape, ENV.device),
                                 lambda p: generator.prunable(p, prune_params.prune_batchnorm, prune_params.prune_residual))
     return prune_result

@@ -1,7 +1,7 @@
 from typing import Tuple, List
 import torch
 from original_code.synflow.Utils import load
-
+from original_code.synflow.Pruners.pruners import Pruner
 
 class State:
     prune_loader = None
@@ -11,6 +11,7 @@ class State:
     loss = None
     scheduler = None  
     optimizer = None  
+    pruner: Pruner
 
 
 

@@ -7,6 +7,6 @@ from params import *
 from typing import List
 
 
-def experiment(model_params: ModelParams, data_params):
+def experiment(model_params: ModelParams, data_params: DataParams, stage1_params: PruningParams, stage2_params):
     pass
 

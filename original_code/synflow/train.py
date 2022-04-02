@@ -2,6 +2,8 @@ import torch
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
 
 def train(model, loss, optimizer, dataloader, device, epoch, verbose, log_interval=10):
     model.train()
@@ -18,6 +20,10 @@ def train(model, loss, optimizer, dataloader, device, epoch, verbose, log_interv
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(dataloader.dataset),
                 100. * batch_idx / len(dataloader), train_loss.item()))
+        if (batch_idx % log_interval == 0):
+            writer.add_scalar('training loss',
+                            train_loss.item() / 1000,
+                            epoch)
     return total / len(dataloader.dataset)
 
 def eval(model, loss, dataloader, device, verbose):

@@ -7,30 +7,21 @@ from pruning import *
 
 
 def main():
-
-    args = synflow_get_args()
     state = State()
     data_params = DataParams(dataset="cifar10")
-    model_params = ModelParams(model_class="lottery", model="resnet20")
-    
     run.prepare_data(state, data_params)
+
+    model_params = ModelParams(model_class="lottery", model="resnet20")
     run.prepare_model(state, model_params, data_params)
+
     
-
-   
     prune_params = PruningParams(strategy="synflow", sparsity = 0.5)
-    prune_result = run.one_shot_pruning(state, prune_params, data_params)
+    prune_result = one_shot_pruning(state, prune_params, data_params)
 
-    pre_result = run.train(state, epochs=1)
+    pre_result = run.train(state, epochs=10)
 
-    # continue with lth
-    lth_prune_result = iterative_pruning(state, args, )
-
-    # post_result = run.posttrain(state, args)
-    # run.display(pre_result, prune_result, post_result)
-
-
-
+    lth_prune_params = PruningParams(strategy="mag", sparsity = 0.1)
+    lth_prune_result = iterative_pruning(state, lth_prune_params, data_params, iterations=10, training_epochs=5)
 
 
 if __name__ == "__main__":

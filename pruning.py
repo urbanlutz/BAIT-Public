@@ -15,7 +15,7 @@ def one_shot_pruning(state, prune_params: PruningParams, data_params: DataParams
     return prune_result
 
 
-def iterative_pruning(state:State, prune_params: PruningParams, data_params: DataParams, iterations=5):
+def iterative_pruning(state:State, prune_params: PruningParams, data_params: DataParams, iterations=5, training_epochs=1):
     run.prepare_pruner(state, prune_params)
     remaining_params, total_params = state.pruner.stats()
     current_sparsity = remaining_params / total_params
@@ -29,7 +29,7 @@ def iterative_pruning(state:State, prune_params: PruningParams, data_params: Dat
 
     for sparsity in sparsity_targets:
         # train
-        result = run.train(state, epochs=1)
+        result = run.train(state, epochs=training_epochs)
         results.append(result)
 
         # prune

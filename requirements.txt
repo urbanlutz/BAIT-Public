@@ -4,5 +4,7 @@ matplotlib>2.0.0
 numpy>=1.0.0
 pandas
 torchvision
+tensorboard > 2.4.0
+torch-tb-profiler
 ipykernel >= 6.0.0
 jupyter

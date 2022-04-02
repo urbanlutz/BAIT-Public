@@ -5,6 +5,7 @@ class Environment:
     device: torch.device
     verbose: bool
     seed: int
+    log = True
 
     def __init__(self, verbose = False, seed=None):
         self.verbose = verbose

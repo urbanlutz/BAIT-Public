@@ -19,6 +19,8 @@ def iterative_pruning(state:State, prune_params: PruningParams, data_params: Dat
     run.prepare_pruner(state, prune_params)
     remaining_params, total_params = state.pruner.stats()
     current_sparsity = remaining_params / total_params
+    print(f"starting with {current_sparsity * 100}%")
+
     sparsity_targets = list(np.linspace(current_sparsity, prune_params.sparsity, iterations))
     results = []
 
@@ -26,9 +28,8 @@ def iterative_pruning(state:State, prune_params: PruningParams, data_params: Dat
 
 
     for sparsity in sparsity_targets:
-
         # train
-        result = run.train(state, prune_params, epochs=1)
+        result = run.train(state, epochs=1)
         results.append(result)
 
         # prune
@@ -38,6 +39,11 @@ def iterative_pruning(state:State, prune_params: PruningParams, data_params: Dat
 
         # rewind
         rewind_weights(state, original_state)
+
+        # display
+        remaining_params, total_params = state.pruner.stats()
+        current_sparsity = remaining_params / total_params
+        print(f"pruned to {current_sparsity * 100}%")
 
     return results
 

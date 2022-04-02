@@ -2,10 +2,10 @@ import torch
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from torch.utils.tensorboard import SummaryWriter
-writer = SummaryWriter()
 
-def train(model, loss, optimizer, dataloader, device, epoch, verbose, log_interval=10):
+from monitor import MONITOR
+def train(model, loss, optimizer, dataloader, device, epoch, verbose, log_interval=2):
+    
     model.train()
     total = 0
     for batch_idx, (data, target) in enumerate(dataloader):
@@ -16,14 +16,13 @@ def train(model, loss, optimizer, dataloader, device, epoch, verbose, log_interv
         total += train_loss.item() * data.size(0)
         train_loss.backward()
         optimizer.step()
-        if verbose & (batch_idx % log_interval == 0):
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(dataloader.dataset),
-                100. * batch_idx / len(dataloader), train_loss.item()))
+        # if verbose & (batch_idx % log_interval == 0):
+        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        #         epoch, batch_idx * len(data), len(dataloader.dataset),
+        #         100. * batch_idx / len(dataloader), train_loss.item()))
         if (batch_idx % log_interval == 0):
-            writer.add_scalar('training loss',
-                            train_loss.item() / 1000,
-                            epoch)
+            MONITOR.track('Loss/Train', train_loss)
+            MONITOR.inc()
     return total / len(dataloader.dataset)
 
 def eval(model, loss, dataloader, device, verbose):
@@ -53,7 +52,13 @@ def train_eval_loop(model, loss, optimizer, scheduler, train_loader, test_loader
     rows = [[np.nan, test_loss, accuracy1, accuracy5]]
     for epoch in tqdm(range(epochs)):
         train_loss = train(model, loss, optimizer, train_loader, device, epoch, verbose)
+        
         test_loss, accuracy1, accuracy5 = eval(model, loss, test_loader, device, verbose)
+        
+        MONITOR.track('Loss/Test', test_loss)
+        MONITOR.track('Accuracy/Top1', accuracy1)
+        MONITOR.track('Accuracy/Top5', accuracy5)
+        # MONITOR.inc()
         row = [train_loss, test_loss, accuracy1, accuracy5]
         scheduler.step()
         rows.append(row)

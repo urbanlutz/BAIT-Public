@@ -9,6 +9,7 @@ from original_code.synflow.Models import tinyimagenet_vgg
 from original_code.synflow.Models import tinyimagenet_resnet
 from original_code.synflow.Models import imagenet_vgg
 from original_code.synflow.Models import imagenet_resnet
+from original_code.synflow.Models import lottery_lenet
 from original_code.synflow.Pruners import pruners
 from original_code.synflow.Utils import custom_datasets
 
@@ -104,6 +105,7 @@ def model(model_architecture, model_class):
         'vgg16-bn' : lottery_vgg.vgg16_bn,
         'vgg19' : lottery_vgg.vgg19,
         'vgg19-bn' : lottery_vgg.vgg19_bn,
+        'lenet5': lottery_lenet.LeNet5,
         'resnet20': lottery_resnet.resnet20,
         'resnet32': lottery_resnet.resnet32,
         'resnet44': lottery_resnet.resnet44,

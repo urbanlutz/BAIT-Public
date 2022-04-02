@@ -3,6 +3,7 @@ import run
 import numpy as np
 from params import *
 
+from monitor import MONITOR
 def one_shot_pruning(state, prune_params: PruningParams, data_params: DataParams):
     run.prepare_pruner(state, prune_params)
     remaining_params, total_params = state.pruner.stats()
@@ -21,17 +22,22 @@ def iterative_pruning(state:State, prune_params: PruningParams, data_params: Dat
     current_sparsity = remaining_params / total_params
     print(f"starting with {current_sparsity * 100}%")
 
-    sparsity_targets = list(np.linspace(current_sparsity, prune_params.sparsity, iterations))
+    sparsity_targets = list(np.linspace(current_sparsity, prune_params.sparsity, iterations + 1))[1:]
     results = []
 
     original_state = deepcopy(state.model.state_dict())
 
 
     for sparsity in sparsity_targets:
+        remaining_params, total_params = state.pruner.stats()
+        current_sparsity = remaining_params / total_params
+        MONITOR.track("Sparsity/Current Sparsity", current_sparsity)
         # train
         result = run.train(state, epochs=training_epochs)
         results.append(result)
-
+        remaining_params, total_params = state.pruner.stats()
+        current_sparsity = remaining_params / total_params
+        
         # prune
         if sparsity < 1:
             prune_params.sparsity = sparsity

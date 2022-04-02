@@ -34,6 +34,7 @@ def iterative_pruning(state:State, prune_params: PruningParams, data_params: Dat
 
         # prune
         if sparsity < 1:
+            prune_params.sparsity = sparsity
             prune_result = run.prune(state, prune_params, data_params)
             results.append(prune_result)
 

@@ -15,7 +15,7 @@ def main():
 
     run.prepare_data(state, data_params)
 
-    model_params = ModelParams(model_class="lottery", model="lenet5")
+    model_params = ModelParams(model_class="lottery", model="lenet_300_100")
 
     run.prepare_model(state, model_params, data_params)
 

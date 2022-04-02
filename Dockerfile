@@ -13,14 +13,13 @@ RUN python -m pip install -r requirements.txt
 RUN apt-get -y update
 RUN apt-get -y install git
 
-RUN git config --global user.email "lutzurb1@students.zhaw.ch"
-RUN git config --global user.name "Urban Lutz"
-RUN git config http.sslVerify false
-
-
 # RUN apt-get -y install ntp
 WORKDIR /app
 COPY . /app
+
+RUN git config --global user.email "lutzurb1@students.zhaw.ch"
+RUN git config --global user.name "Urban Lutz"
+RUN git config --global http.sslVerify false
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers

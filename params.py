@@ -3,6 +3,7 @@ import torch
 from original_code.synflow.Utils import load
 from original_code.synflow.Pruners.pruners import Pruner
 from datetime import datetime
+from pathlib import Path
 
 
 class State:
@@ -10,29 +11,34 @@ class State:
     train_loader = None
     test_loader = None
     model: torch.nn.Module
-    loss = None
-    scheduler = None  
-    optimizer = None  
+    loss: torch.nn.modules.loss._Loss
+    scheduler: torch.optim.lr_scheduler.MultiStepLR 
+    optimizer = torch.optim.Optimizer 
     pruner: Pruner
 
     def save(self, path:str = None):
         if not path:
-            path = "./saves/" + datetime.now() + "/"
-        torch.save(self.model, path + "model.pt")
-        torch.save(self.optimizer, path + "optimizier.pt")
+            path = "./saves/" + str(datetime.now()).replace(" ", "_").replace(":", "-").replace(".","_")
+        Path(path).mkdir(parents=True, exist_ok=True)
+        torch.save(self.model, path + "/model.pt")
+        torch.save(self.optimizer, path + "/optimizer.pt")
+        torch.save(self.scheduler, path + "/scheduler.pt")
 
+    def load(self, path:str):
+        self.model = torch.load(path + "/model.pt")
+        self.optimizer = torch.load(path + "/optimizer.pt")
+        self.scheduler = torch.load(path + "/scheduler.pt")
 
 class ModelParams:
     model: str
     model_class: str
-    lr: float = 0.001
-    lr_drop_rate: float = 0.1
-    lr_drops: List = []
-    weight_decay: float = 0.0
+    lr: float
+    lr_drop_rate: float 
+    lr_drops: List
+    weight_decay: float
+    dense_classifier: bool
+    pretrained: bool
     optimizer: str
-    dense_classifier: bool = False
-    pretrained: bool = False
-    optimizer: str = "adam"
  
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
@@ -41,29 +47,30 @@ class DataParams:
     dataset: str = "mnist"
     num_classes: int
     input_shape: Tuple[int, int, int]
-    train_batch_size: int = 64
-    test_batch_size: int = 256
-    prune_batch_size: int = 256
-    workers: int = 4
-    prune_dataset_ratio: int = 10
+    train_batch_size: int
+    test_batch_size: int
+    prune_batch_size: int
+    workers: int
+    prune_dataset_ratio: int
 
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)
         self.input_shape, self.num_classes = load.dimension(self.dataset) 
 
+ # TODO: cleanup?
 class PruningParams:
-    strategy: str = "synflow"
-    sparsity: float = 0.5
-    prune_epochs: int = 1
-    prune_bias: bool = False
-    prune_batchnorm: bool = False
-    prune_residual: bool = False
-    compression_schedule: str = "exponential"
-    mask_scope: str = "global"
-    reinitialize: bool = False
-    prune_train_mode: bool = False
-    shuffle: bool = False
-    invert: bool = False
+    strategy: str
+    sparsity: float
+    prune_epochs: int
+    prune_bias: bool
+    prune_batchnorm: bool
+    prune_residual: bool
+    compression_schedule: str
+    mask_scope: str
+    reinitialize: bool
+    prune_train_mode: bool
+    shuffle: bool
+    invert: bool
 
     def __init__(self, **kwargs):
         self.__dict__.update(**kwargs)

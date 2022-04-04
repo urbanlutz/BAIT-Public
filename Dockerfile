@@ -5,5 +5,5 @@ COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 WORKDIR /app
 COPY . /app
-CMD ["experiment.py"]
+CMD ["main.py"]
 ENTRYPOINT [ "python" ]

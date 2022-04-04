@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from monitor import MONITOR
-def train(model, loss, optimizer, dataloader, device, epoch, verbose, log_interval=2):
+def train(model, loss, optimizer:torch.optim.Optimizer, dataloader, device, epoch, verbose, log_interval=2):
     
     model.train()
     total = 0
@@ -58,7 +58,7 @@ def train_eval_loop(model, loss, optimizer, scheduler, train_loader, test_loader
         MONITOR.track('Loss/Test', test_loss)
         MONITOR.track('Accuracy/Top1', accuracy1)
         MONITOR.track('Accuracy/Top5', accuracy5)
-        # MONITOR.inc()
+
         row = [train_loss, test_loss, accuracy1, accuracy5]
         scheduler.step()
         rows.append(row)

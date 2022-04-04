@@ -20,12 +20,13 @@ def main():
     run.prepare_model(state, model_params, data_params)
 
     
-    prune_params = PruningParams(strategy="synflow", sparsity = 0.5)
-    prune_result = one_shot_pruning(state, prune_params, data_params)
+    # prune_params = PruningParams(strategy="synflow", sparsity = 0.5)
+    # prune_result = one_shot_pruning(state, prune_params, data_params)
 
     lth_prune_params = PruningParams(strategy="mag", sparsity = 0.1)
-    lth_prune_result = iterative_pruning(state, lth_prune_params, data_params, iterations=10, training_epochs=5)
+    lth_prune_result = iterative_pruning(state, lth_prune_params, data_params, iterations=35, training_epochs=100)
 
+    state.save()
 
 if __name__ == "__main__":
     main()

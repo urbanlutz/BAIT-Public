@@ -2,6 +2,8 @@ from typing import Tuple, List
 import torch
 from original_code.synflow.Utils import load
 from original_code.synflow.Pruners.pruners import Pruner
+from datetime import datetime
+
 
 class State:
     prune_loader = None
@@ -13,6 +15,11 @@ class State:
     optimizer = None  
     pruner: Pruner
 
+    def save(self, path:str = None):
+        if not path:
+            path = "./saved/" + datetime.now() + "/"
+        torch.save(self.model, path + "model.pt")
+        torch.save(self.optimizer, path + "optimizier.pt")
 
 
 class ModelParams:

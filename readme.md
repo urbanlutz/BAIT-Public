@@ -40,6 +40,12 @@ Connect to Docker Host
     - Add Floating IP from Docker Host
 3. Connect
 4. Pull git repo onto Docker host
+5. configure git user name
+```
+git config --global user.email "lutzurb1@students.zhaw.ch"
+git config --global user.name "Urban Lutz"
+git config --global http.sslVerify false
+```
 
 Launch DevContainer
 1. ctrl+p -> Remote Containers: Reopen in Container

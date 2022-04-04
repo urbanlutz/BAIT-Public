@@ -3,7 +3,7 @@ from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 
 class Monitor:
-
+    writer = None
 
     def __init__(self, experiment:str = None):
         self.iteration = 1
@@ -11,7 +11,8 @@ class Monitor:
         if experiment:
             name = f"{experiment}_{datetime.now().split(' ')[0]}"
         else:
-            self.name = None
+            name = None
+
         self.writer = SummaryWriter(name)
 
     def __del__(self):

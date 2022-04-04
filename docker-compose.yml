@@ -6,3 +6,6 @@ services:
       - type: bind
         source: ./runs
         target: /app/runs/
+      - type: bind
+        source: ./saves
+        target: /app/saves/

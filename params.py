@@ -17,7 +17,7 @@ class State:
 
     def save(self, path:str = None):
         if not path:
-            path = "./saved/" + datetime.now() + "/"
+            path = "./saves/" + datetime.now() + "/"
         torch.save(self.model, path + "model.pt")
         torch.save(self.optimizer, path + "optimizier.pt")
 

@@ -1,15 +1,21 @@
+from dataclasses import dataclass
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 class Monitor:
-    writer = SummaryWriter()
-    iteration = 1
+
+
+    def __init__(self, experiment:str = None):
+        self.iteration = 1
+
+        if experiment:
+            name = f"{experiment}_{datetime.now().split(' ')[0]}"
+        else:
+            self.name = None
+        self.writer = SummaryWriter(name)
 
     def __del__(self):
         self.writer.flush()
-
-    def reset(self):
-        self.writer = SummaryWriter()
-        self.iteration = 1
 
     def inc(self):
         self.iteration += 1
